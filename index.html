@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Telegram Mini App -->
+    <script src="https://telegram.org/js/telegram-web-app.js?64"></script>
+
+    <title>Tonavio</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at 80% 0%, rgba(111, 76, 255, 0.18), transparent 35%),
+                radial-gradient(circle at 0% 30%, rgba(75, 120, 255, 0.10), transparent 30%),
+                #09090d;
+            color: #ffffff;
+            min-height: 100vh;
+            padding-bottom: 90px;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 16px 30px;
+        }
+
+        /* HEADER */
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            background:
+                linear-gradient(145deg, #9b6cff, #5d65ff 55%, #3e8fff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            box-shadow:
+                0 8px 30px rgba(104, 91, 255, 0.35);
+        }
+
+        .brand-name {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-subtitle {
+            color: #777783;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        .profile-button {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #262631;
+            border-radius: 50%;
+            background: #14141b;
+            color: #bdbdc8;
+            cursor: pointer;
+        }
+
+        /* HERO */
+
+        .hero {
+            margin-bottom: 26px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 11px;
+            border-radius: 20px;
+            background: rgba(116, 91, 255, 0.12);
+            border: 1px solid rgba(116, 91, 255, 0.25);
+            color: #a995ff;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .hero h1 {
+            font-size: clamp(30px, 8vw, 54px);
+            line-height: 1.02;
+            letter-spacing: -1.8px;
+            margin-bottom: 12px;
+            max-width: 700px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #b996ff, #7e8dff, #61a7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: #858590;
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 600px;
+        }
+
+        /* SEARCH */
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px;
+            background: rgba(20, 20, 28, 0.95);
+            border: 1px solid #292934;
+            border-radius: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .search-icon {
+            margin-left: 12px;
+            color: #777783;
+            font-size: 18px;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            font-size: 14px;
+        }
+
+        .search-input::placeholder {
+            color: #676771;
+        }
+
+        .search-button {
+            border: none;
+            border-radius: 11px;
+            padding: 11px 17px;
+            background: linear-gradient(135deg, #8063ff, #5e73ff);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(102, 91, 255, 0.25);
+        }
+
+        /* FILTERS */
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 9px;
+            margin-bottom: 28px;
+        }
+
+        .filter {
+            background: #13131a;
+            border: 1px solid #272730;
+            border-radius: 13px;
+            padding: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .filter:hover {
+            border-color: #5750a0;
+            transform: translateY(-1px);
+        }
+
+        .filter-label {
+            font-size: 10px;
+            color: #666671;
+            margin-bottom: 5px;
+        }
+
+        .filter-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: #dedee6;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* SECTION */
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 13px;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .section-link {
+            color: #8e80ff;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* CARDS */
+
+        .cards {
+            display: grid;
+            gap: 10px;
+        }
+
+        .gift-card {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 13px;
+            background:
+                linear-gradient(145deg, rgba(27, 27, 37, 0.95), rgba(17, 17, 24, 0.95));
+            border: 1px solid #292934;
+            border-radius: 17px;
+            transition: 0.2s;
+        }
+
+        .gift-card:hover {
+            transform: translateY(-2px);
+            border-color: #48445f;
+        }
+
+        .gift-image {
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+            border-radius: 15px;
+            background:
+                radial-gradient(circle at 35% 30%, #a98cff, transparent 28%),
+                linear-gradient(145deg, #302052, #141a36);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 27px;
+            box-shadow: inset 0 0 25px rgba(129, 99, 255, 0.12);
+        }
+
+        .gift-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .gift-name {
+            font-size: 14px;
+            font-weight: 750;
+            margin-bottom: 5px;
+        }
+
+        .gift-market {
+            font-size: 11px;
+            color: #74747f;
+        }
+
+        .gift-right {
+            text-align: right;
+        }
+
+        .gift-price {
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .gift-change {
+            display: inline-block;
+            padding: 4px 7px;
+            border-radius: 7px;
+            background: rgba(65, 214, 143, 0.10);
+            color: #4bd995;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        /* BOTTOM NAV */
+
+        .bottom-nav {
+            position: fixed;
+            left: 50%;
+            bottom: 12px;
+            transform: translateX(-50%);
+            width: calc(100% - 24px);
+            max-width: 600px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            padding: 7px;
+            background: rgba(20, 20, 27, 0.94);
+            border: 1px solid #292933;
+            border-radius: 19px;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+        }
+
+        .nav-item {
+            border: none;
+            background: transparent;
+            color: #666672;
+            padding: 8px 4px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .nav-item-icon {
+            display: block;
+            font-size: 17px;
+            margin-bottom: 3px;
+        }
+
+        .nav-item.active {
+            color: #a494ff;
+            background: rgba(126, 104, 255, 0.10);
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 650px) {
+            .filters {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .gift-card {
+                padding: 11px;
+            }
+
+            .gift-image {
+                width: 56px;
+                height: 56px;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .container {
+                padding-left: 13px;
+                padding-right: 13px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .search-button {
+                padding: 11px 13px;
+            }
+
+            .brand-name {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="brand">
+            <div class="logo">T</div>
+
+            <div>
+                <div class="brand-name">Tonavio</div>
+                <div class="brand-subtitle">Telegram Gifts Market Intelligence</div>
+            </div>
+        </div>
+
+        <button class="profile-button" onclick="showProfile()">●</button>
+    </header>
+
+
+    <!-- HERO -->
+    <section class="hero">
+
+        <div class="hero-badge">
+            ✦ MARKET TERMINAL
+        </div>
+
+        <h1>
+            Find the best
+            <span class="gradient-text">Telegram Gifts</span>
+        </h1>
+
+        <p>
+            Search across marketplaces, compare prices,
+            track floors and discover opportunities before others.
+        </p>
+
+    </section>
+
+
+    <!-- SEARCH -->
+    <section>
+
+        <div class="search-box">
+
+            <span class="search-icon">⌕</span>
+
+            <input
+                id="searchInput"
+                class="search-input"
+                type="text"
+                placeholder="Search gifts, collections or numbers..."
+                autocomplete="off"
+            >
+
+            <button
+                class="search-button"
+                onclick="performSearch()"
+            >
+                Search
+            </button>
+
+        </div>
+
+
+        <!-- FILTERS -->
+        <div class="filters">
+
+            <div class="filter" onclick="selectFilter('Collection')">
+                <div class="filter-label">COLLECTION</div>
+                <div class="filter-value" id="collectionFilter">
+                    All collections
+                </div>
+            </div>
+
+            <div class="filter" onclick="selectFilter('Model')">
+                <div class="filter-label">MODEL</div>
+                <div class="filter-value" id="modelFilter">
+                    All models
+                </div>
+            </div>
+
+            <div class="filter" onclick="selectFilter('Marketplace')">
+                <div class="filter-label">MARKETPLACE</div>
+                <div class="filter-value" id="marketFilter">
+                    All markets
+                </div>
+            </div>
+
+            <div class="filter" onclick="selectFilter('Price')">
+                <div class="filter-label">MAX PRICE</div>
+                <div class="filter-value" id="priceFilter">
+                    Any price
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- OPPORTUNITIES -->
+    <section>
+
+        <div class="section-header">
+
+            <div class="section-title">
+                Market opportunities
+            </div>
+
+            <div
+                class="section-link"
+                onclick="showAll()"
+            >
+                View all
+            </div>
+
+        </div>
+
+
+        <div class="cards">
+
+            <!-- CARD 1 -->
+            <div class="gift-card">
+
+                <div class="gift-image">
+                    🧸
+                </div>
+
+                <div class="gift-info">
+                    <div class="gift-name">
+                        Plush Pepe #1842
+                    </div>
+
+                    <div class="gift-market">
+                        Portals · Listed now
+                    </div>
+                </div>
+
+                <div class="gift-right">
+
+                    <div class="gift-price">
+                        18.4 TON
+                    </div>
+
+                    <div class="gift-change">
+                        ↓ 6.2% below floor
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CARD 2 -->
+            <div class="gift-card">
+
+                <div class="gift-image">
+                    💗
+                </div>
+
+                <div class="gift-info">
+                    <div class="gift-name">
+                        Heart Locket #529
+                    </div>
+
+                    <div class="gift-market">
+                        MRKT · Listed now
+                    </div>
+                </div>
+
+                <div class="gift-right">
+
+                    <div class="gift-price">
+                        12.7 TON
+                    </div>
+
+                    <div class="gift-change">
+                        ↓ 4.8% below floor
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CARD 3 -->
+            <div class="gift-card">
+
+                <div class="gift-image">
+                    🐱
+                </div>
+
+                <div class="gift-info">
+                    <div class="gift-name">
+                        Scared Cat #9100
+                    </div>
+
+                    <div class="gift-market">
+                        TONNEL · Listed now
+                    </div>
+                </div>
+
+                <div class="gift-right">
+
+                    <div class="gift-price">
+                        24.1 TON
+                    </div>
+
+                    <div class="gift-change">
+                        ↓ 3.1% below floor
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- BOTTOM NAV -->
+
+<nav class="bottom-nav">
+
+    <button
+        class="nav-item active"
+        onclick="navigate('home', this)"
+    >
+        <span class="nav-item-icon">⌂</span>
+        Home
+    </button>
+
+    <button
+        class="nav-item"
+        onclick="navigate('search', this)"
+    >
+        <span class="nav-item-icon">⌕</span>
+        Search
+    </button>
+
+    <button
+        class="nav-item"
+        onclick="navigate('scanner', this)"
+    >
+        <span class="nav-item-icon">◈</span>
+        Scanner
+    </button>
+
+    <button
+        class="nav-item"
+        onclick="navigate('alerts', this)"
+    >
+        <span class="nav-item-icon">♢</span>
+        Alerts
+    </button>
+
+</nav>
+
+
+<script>
+
+    /*
+     * ============================================
+     * TELEGRAM MINI APP INITIALIZATION
+     * ============================================
+     */
+
+    const tg = window.Telegram && window.Telegram.WebApp
+        ? window.Telegram.WebApp
+        : null;
+
+
+    if (tg) {
+
+        // Tell Telegram that the app is ready.
+        tg.ready();
+
+        // Expand the Mini App to available height.
+        tg.expand();
+
+        // Apply Telegram colors when available.
+        if (tg.themeParams) {
+
+            const root = document.documentElement;
+
+            if (tg.themeParams.bg_color) {
+                root.style.setProperty(
+                    "--telegram-bg",
+                    tg.themeParams.bg_color
+                );
+            }
+
+        }
+
+    }
+
+
+    /*
+     * ============================================
+     * SEARCH
+     * ============================================
+     */
+
+    function performSearch() {
+
+        const input = document.getElementById("searchInput");
+        const value = input.value.trim();
+
+        if (!value) {
+
+            if (tg && tg.showPopup) {
+
+                tg.showPopup({
+                    title: "Search",
+                    message: "Enter a gift, collection or number.",
+                    buttons: [
+                        {
+                            type: "ok"
+                        }
+                    ]
+                });
+
+            } else {
+
+                alert("Enter a gift, collection or number.");
+
+            }
+
+            return;
+        }
+
+
+        console.log("Tonavio search:", value);
+
+
+        if (tg && tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred("light");
+        }
+
+
+        if (tg && tg.showPopup) {
+
+            tg.showPopup({
+                title: "Search",
+                message: `Searching for "${value}"`,
+                buttons: [
+                    {
+                        type: "ok"
+                    }
+                ]
+            });
+
+        } else {
+
+            alert(`Searching for "${value}"`);
+
+        }
+
+    }
+
+
+    /*
+     * ENTER KEY SEARCH
+     */
+
+    document
+        .getElementById("searchInput")
+        .addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                performSearch();
+            }
+
+        });
+
+
+    /*
+     * ============================================
+     * FILTERS
+     * ============================================
+     */
+
+    function selectFilter(type) {
+
+        if (tg && tg.HapticFeedback) {
+            tg.HapticFeedback.selectionChanged();
+        }
+
+
+        let message = "";
+
+        if (type === "Collection") {
+            message = "Collection filter will be connected to the Tonavio database next.";
+        }
+
+        if (type === "Model") {
+            message = "Model filter will be connected to the Tonavio database next.";
+        }
+
+        if (type === "Marketplace") {
+            message = "Marketplace filter will be connected to the Tonavio database next.";
+        }
+
+        if (type === "Price") {
+            message = "Price filter will be connected to the Tonavio database next.";
+        }
+
+
+        if (tg && tg.showPopup) {
+
+            tg.showPopup({
+                title: type,
+                message: message,
+                buttons: [
+                    {
+                        type: "ok"
+                    }
+                ]
+            });
+
+        } else {
+
+            alert(message);
+
+        }
+
+    }
+
+
+    /*
+     * ============================================
+     * PROFILE
+     * ============================================
+     */
+
+    function showProfile() {
+
+        if (tg && tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred("light");
+        }
+
+
+        let message = "Tonavio profile";
+
+
+        if (
+            tg &&
+            tg.initDataUnsafe &&
+            tg.initDataUnsafe.user
+        ) {
+
+            const user = tg.initDataUnsafe.user;
+
+            const name =
+                user.first_name ||
+                "Telegram user";
+
+            message =
+                `Hello, ${name}!\\n\\n` +
+                "Your Tonavio account will appear here.";
+
+        }
+
+
+        if (tg && tg.showPopup) {
+
+            tg.showPopup({
+                title: "Profile",
+                message: message,
+                buttons: [
+                    {
+                        type: "ok"
+                    }
+                ]
+            });
+
+        } else {
+
+            alert(message);
+
+        }
+
+    }
+
+
+    /*
+     * ============================================
+     * BOTTOM NAVIGATION
+     * ============================================
+     */
+
+    function navigate(section, button) {
+
+        document
+            .querySelectorAll(".nav-item")
+            .forEach(function(item) {
+
+                item.classList.remove("active");
+
+            });
+
+
+        button.classList.add("active");
+
+
+        if (tg && tg.HapticFeedback) {
+            tg.HapticFeedback.selectionChanged();
+        }
+
+
+        let message = "";
+
+
+        if (section === "home") {
+            message = "Tonavio Home";
+        }
+
+        if (section === "search") {
+            document
+                .getElementById("searchInput")
+                .focus();
+
+            return;
+        }
+
+        if (section === "scanner") {
+            message = "Scanner will be connected to live marketplace data next.";
+        }
+
+        if (section === "alerts") {
+            message = "Your price alerts will appear here.";
+        }
+
+
+        if (tg && tg.showPopup) {
+
+            tg.showPopup({
+                title: "Tonavio",
+                message: message,
+                buttons: [
+                    {
+                        type: "ok"
+                    }
+                ]
+            });
+
+        } else {
+
+            alert(message);
+
+        }
+
+    }
+
+
+    /*
+     * ============================================
+     * VIEW ALL
+     * ============================================
+     */
+
+    function showAll() {
+
+        if (tg && tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred("light");
+        }
+
+
+        if (tg && tg.showPopup) {
+
+            tg.showPopup({
+                title: "Market opportunities",
+                message: "The full opportunities list will be connected to live market data next.",
+                buttons: [
+                    {
+                        type: "ok"
+                    }
+                ]
+            });
+
+        } else {
+
+            alert(
+                "The full opportunities list will be connected to live market data next."
+            );
+
+        }
+
+    }
+
+</script>
+
+</body>
+</html>
