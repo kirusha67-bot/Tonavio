@@ -5,39 +5,38 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <!-- Telegram Mini App -->
-    <script src="https://telegram.org/js/telegram-web-app.js?64"></script>
-
     <title>Tonavio</title>
+
+    <script src="https://telegram.org/js/telegram-web-app.js?64"></script>
 
     <style>
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 0;
             background:
-                radial-gradient(circle at 80% 0%, rgba(111, 76, 255, 0.18), transparent 35%),
-                radial-gradient(circle at 0% 30%, rgba(75, 120, 255, 0.10), transparent 30%),
-                #09090d;
-            color: #ffffff;
+                radial-gradient(circle at 80% 0%, rgba(124, 92, 255, 0.18), transparent 32%),
+                #08090d;
+            color: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                         "Segoe UI", sans-serif;
             min-height: 100vh;
             padding-bottom: 90px;
         }
 
         button,
-        input {
+        input,
+        select {
             font: inherit;
         }
 
-        .container {
-            width: 100%;
-            max-width: 900px;
+        .app {
+            max-width: 720px;
             margin: 0 auto;
-            padding: 20px 16px 30px;
+            padding: 18px 16px 30px;
         }
 
         /* HEADER */
@@ -46,233 +45,242 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 11px;
+            gap: 10px;
         }
 
         .logo {
-            width: 42px;
-            height: 42px;
-            border-radius: 13px;
-            background:
-                linear-gradient(145deg, #9b6cff, #5d65ff 55%, #3e8fff);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            font-weight: 900;
-            box-shadow:
-                0 8px 30px rgba(104, 91, 255, 0.35);
+            font-size: 21px;
+            font-weight: 800;
+            background:
+                linear-gradient(145deg, #a78bfa, #6366f1 55%, #4338ca);
+            box-shadow: 0 8px 28px rgba(99, 102, 241, .35);
         }
 
         .brand-name {
-            font-size: 22px;
+            font-size: 21px;
             font-weight: 800;
             letter-spacing: -0.5px;
         }
 
         .brand-subtitle {
-            color: #777783;
+            color: #777b8a;
             font-size: 11px;
             margin-top: 2px;
         }
 
-        .profile-button {
-            width: 40px;
-            height: 40px;
-            border: 1px solid #262631;
-            border-radius: 50%;
-            background: #14141b;
-            color: #bdbdc8;
-            cursor: pointer;
-        }
-
-        /* HERO */
-
-        .hero {
-            margin-bottom: 26px;
-        }
-
-        .hero-badge {
-            display: inline-flex;
+        .status {
+            display: flex;
             align-items: center;
             gap: 6px;
-            padding: 7px 11px;
-            border-radius: 20px;
-            background: rgba(116, 91, 255, 0.12);
-            border: 1px solid rgba(116, 91, 255, 0.25);
-            color: #a995ff;
+            color: #8d91a0;
             font-size: 11px;
-            font-weight: 700;
-            margin-bottom: 14px;
         }
 
-        .hero h1 {
-            font-size: clamp(30px, 8vw, 54px);
-            line-height: 1.02;
-            letter-spacing: -1.8px;
-            margin-bottom: 12px;
-            max-width: 700px;
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #38d996;
+            box-shadow: 0 0 10px rgba(56, 217, 150, .7);
         }
 
-        .gradient-text {
-            background: linear-gradient(90deg, #b996ff, #7e8dff, #61a7ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* TITLE */
+
+        .title {
+            margin-bottom: 20px;
         }
 
-        .hero p {
-            color: #858590;
+        .title h1 {
+            margin: 0;
+            font-size: 30px;
+            line-height: 1.1;
+            letter-spacing: -1.2px;
+        }
+
+        .title p {
+            margin: 9px 0 0;
+            color: #858996;
             font-size: 14px;
             line-height: 1.5;
-            max-width: 600px;
         }
 
         /* SEARCH */
 
         .search-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px;
-            background: rgba(20, 20, 28, 0.95);
-            border: 1px solid #292934;
-            border-radius: 16px;
-            margin-bottom: 14px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+            position: relative;
+            margin-bottom: 18px;
         }
 
         .search-icon {
-            margin-left: 12px;
-            color: #777783;
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
             font-size: 18px;
+            color: #777b89;
         }
 
         .search-input {
-            flex: 1;
-            min-width: 0;
-            background: transparent;
-            border: none;
+            width: 100%;
+            border: 1px solid #222532;
             outline: none;
-            color: white;
-            font-size: 14px;
+            background: #11131a;
+            color: #fff;
+            border-radius: 15px;
+            padding: 15px 16px 15px 44px;
+            font-size: 15px;
+            transition: .2s;
         }
 
-        .search-input::placeholder {
-            color: #676771;
-        }
-
-        .search-button {
-            border: none;
-            border-radius: 11px;
-            padding: 11px 17px;
-            background: linear-gradient(135deg, #8063ff, #5e73ff);
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 6px 18px rgba(102, 91, 255, 0.25);
+        .search-input:focus {
+            border-color: #7165ff;
+            box-shadow: 0 0 0 3px rgba(113, 101, 255, .10);
         }
 
         /* FILTERS */
 
         .filters {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 9px;
-            margin-bottom: 28px;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
         }
 
         .filter {
-            background: #13131a;
-            border: 1px solid #272730;
+            width: 100%;
+            border: 1px solid #222532;
+            background: #11131a;
+            color: #e8e8ed;
             border-radius: 13px;
-            padding: 12px;
+            padding: 13px 12px;
+            text-align: left;
             cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .filter:hover {
-            border-color: #5750a0;
-            transform: translateY(-1px);
         }
 
         .filter-label {
+            display: block;
+            color: #737786;
             font-size: 10px;
-            color: #666671;
             margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
         }
 
         .filter-value {
-            font-size: 12px;
-            font-weight: 600;
-            color: #dedee6;
+            display: block;
+            font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* SECTION */
+        .price-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
 
-        .section-header {
+        .number-input {
+            width: 100%;
+            border: 1px solid #222532;
+            background: #11131a;
+            color: #fff;
+            border-radius: 13px;
+            padding: 13px 12px;
+            outline: none;
+            font-size: 13px;
+        }
+
+        .number-input:focus {
+            border-color: #7165ff;
+        }
+
+        /* BUTTON */
+
+        .search-button {
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            padding: 15px;
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #7c5cff, #5c6cff);
+            box-shadow: 0 10px 30px rgba(100, 85, 255, .25);
+            margin-bottom: 27px;
+        }
+
+        .search-button:active {
+            transform: scale(.985);
+        }
+
+        /* RESULTS HEADER */
+
+        .results-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 13px;
+            margin-bottom: 12px;
         }
 
-        .section-title {
-            font-size: 17px;
-            font-weight: 800;
+        .results-title {
+            font-size: 16px;
+            font-weight: 700;
         }
 
-        .section-link {
-            color: #8e80ff;
+        .results-count {
+            color: #777b89;
             font-size: 12px;
-            cursor: pointer;
         }
 
-        /* CARDS */
-
-        .cards {
-            display: grid;
-            gap: 10px;
-        }
+        /* CARD */
 
         .gift-card {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            padding: 13px;
-            background:
-                linear-gradient(145deg, rgba(27, 27, 37, 0.95), rgba(17, 17, 24, 0.95));
-            border: 1px solid #292934;
-            border-radius: 17px;
-            transition: 0.2s;
+            background: linear-gradient(145deg, #12141c, #0e1016);
+            border: 1px solid #222532;
+            border-radius: 18px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: .2s;
         }
 
-        .gift-card:hover {
-            transform: translateY(-2px);
-            border-color: #48445f;
+        .gift-card:active {
+            transform: scale(.99);
+        }
+
+        .gift-top {
+            display: flex;
+            gap: 13px;
+            align-items: center;
         }
 
         .gift-image {
-            width: 64px;
-            height: 64px;
+            width: 62px;
+            height: 62px;
             flex-shrink: 0;
-            border-radius: 15px;
-            background:
-                radial-gradient(circle at 35% 30%, #a98cff, transparent 28%),
-                linear-gradient(145deg, #302052, #141a36);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 27px;
-            box-shadow: inset 0 0 25px rgba(129, 99, 255, 0.12);
+            font-size: 29px;
+            background:
+                radial-gradient(circle at 30% 25%, #6e5cff, transparent 45%),
+                linear-gradient(145deg, #24283a, #151722);
+            border: 1px solid #30344a;
         }
 
         .gift-info {
@@ -281,112 +289,198 @@
         }
 
         .gift-name {
-            font-size: 14px;
-            font-weight: 750;
-            margin-bottom: 5px;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
         }
 
-        .gift-market {
+        .gift-details {
+            color: #7d8190;
             font-size: 11px;
-            color: #74747f;
-        }
-
-        .gift-right {
-            text-align: right;
         }
 
         .gift-price {
-            font-size: 15px;
-            font-weight: 800;
-            margin-bottom: 5px;
+            text-align: right;
         }
 
-        .gift-change {
+        .price-main {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .price-ton {
+            color: #777b89;
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .deal {
             display: inline-block;
+            margin-top: 5px;
             padding: 4px 7px;
             border-radius: 7px;
-            background: rgba(65, 214, 143, 0.10);
-            color: #4bd995;
+            background: rgba(45, 207, 144, .10);
+            color: #40d79c;
             font-size: 10px;
             font-weight: 700;
+        }
+
+        .markets {
+            border-top: 1px solid #20232d;
+            margin-top: 13px;
+            padding-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px;
+        }
+
+        .market-item {
+            background: #0b0d12;
+            border-radius: 10px;
+            padding: 9px 8px;
+        }
+
+        .market-name {
+            color: #777b89;
+            font-size: 9px;
+            margin-bottom: 3px;
+        }
+
+        .market-price {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .best {
+            color: #45dca1;
         }
 
         /* BOTTOM NAV */
 
         .bottom-nav {
             position: fixed;
+            z-index: 100;
+            bottom: 0;
             left: 50%;
-            bottom: 12px;
             transform: translateX(-50%);
-            width: calc(100% - 24px);
-            max-width: 600px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-            padding: 7px;
-            background: rgba(20, 20, 27, 0.94);
-            border: 1px solid #292933;
-            border-radius: 19px;
+            width: min(720px, 100%);
+            padding: 9px 10px calc(9px + env(safe-area-inset-bottom));
+            background: rgba(10, 11, 16, .92);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-            z-index: 100;
+            border-top: 1px solid #20232d;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
         }
 
-        .nav-item {
+        .nav-button {
             border: none;
-            background: transparent;
-            color: #666672;
-            padding: 8px 4px;
-            border-radius: 12px;
+            background: none;
+            color: #6f7381;
+            padding: 7px 4px;
             cursor: pointer;
             font-size: 10px;
         }
 
-        .nav-item-icon {
+        .nav-button span {
             display: block;
-            font-size: 17px;
+            font-size: 19px;
             margin-bottom: 3px;
         }
 
-        .nav-item.active {
-            color: #a494ff;
-            background: rgba(126, 104, 255, 0.10);
+        .nav-button.active {
+            color: #9a8cff;
         }
 
-        /* MOBILE */
+        /* POPUP */
 
-        @media (max-width: 650px) {
-            .filters {
-                grid-template-columns: repeat(2, 1fr);
+        .popup {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            background: rgba(0,0,0,.55);
+        }
+
+        .popup.active {
+            display: flex;
+        }
+
+        .popup-content {
+            width: min(720px, 100%);
+            background: #11131a;
+            border: 1px solid #272a36;
+            border-bottom: none;
+            border-radius: 23px 23px 0 0;
+            padding: 20px;
+            animation: slideUp .2s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
             }
 
-            .gift-card {
-                padding: 11px;
-            }
-
-            .gift-image {
-                width: 56px;
-                height: 56px;
+            to {
+                transform: translateY(0);
+                opacity: 1;
             }
         }
 
-        @media (max-width: 430px) {
-            .container {
+        .popup-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .popup-option {
+            width: 100%;
+            border: 1px solid #242733;
+            background: #0c0e13;
+            color: #eee;
+            border-radius: 12px;
+            padding: 13px;
+            text-align: left;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .popup-option:hover {
+            border-color: #7165ff;
+        }
+
+        .close-popup {
+            width: 100%;
+            border: none;
+            background: #20232d;
+            color: #ddd;
+            border-radius: 12px;
+            padding: 13px;
+            margin-top: 5px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 390px) {
+            .app {
                 padding-left: 13px;
                 padding-right: 13px;
             }
 
-            .hero h1 {
-                font-size: 32px;
+            .title h1 {
+                font-size: 27px;
             }
 
-            .search-button {
-                padding: 11px 13px;
+            .gift-image {
+                width: 55px;
+                height: 55px;
             }
 
-            .brand-name {
-                font-size: 20px;
+            .markets {
+                gap: 5px;
             }
         }
     </style>
@@ -394,9 +488,8 @@
 
 <body>
 
-<div class="container">
+<div class="app">
 
-    <!-- HEADER -->
     <header class="header">
         <div class="brand">
             <div class="logo">T</div>
@@ -407,583 +500,441 @@
             </div>
         </div>
 
-        <button class="profile-button" onclick="showProfile()">●</button>
+        <div class="status">
+            <span class="status-dot"></span>
+            Live
+        </div>
     </header>
 
-
-    <!-- HERO -->
-    <section class="hero">
-
-        <div class="hero-badge">
-            ✦ MARKET TERMINAL
-        </div>
-
-        <h1>
-            Find the best
-            <span class="gradient-text">Telegram Gifts</span>
-        </h1>
-
+    <section class="title">
+        <h1>Search Gifts</h1>
         <p>
-            Search across marketplaces, compare prices,
-            track floors and discover opportunities before others.
+            Compare Telegram Gifts across marketplaces
+            and find the best available price.
         </p>
-
     </section>
 
+    <div class="search-box">
+        <span class="search-icon">⌕</span>
 
-    <!-- SEARCH -->
-    <section>
+        <input
+            id="searchInput"
+            class="search-input"
+            type="text"
+            placeholder="Search collection, model or gift #"
+        >
+    </div>
 
-        <div class="search-box">
+    <div class="filters">
 
-            <span class="search-icon">⌕</span>
+        <button class="filter" onclick="openFilter('collection')">
+            <span class="filter-label">Collection</span>
+            <span class="filter-value" id="collectionValue">All collections</span>
+        </button>
 
-            <input
-                id="searchInput"
-                class="search-input"
-                type="text"
-                placeholder="Search gifts, collections or numbers..."
-                autocomplete="off"
-            >
+        <button class="filter" onclick="openFilter('model')">
+            <span class="filter-label">Model</span>
+            <span class="filter-value" id="modelValue">Any model</span>
+        </button>
 
-            <button
-                class="search-button"
-                onclick="performSearch()"
-            >
-                Search
-            </button>
+        <button class="filter" onclick="openFilter('backdrop')">
+            <span class="filter-label">Backdrop</span>
+            <span class="filter-value" id="backdropValue">Any backdrop</span>
+        </button>
 
-        </div>
+        <button class="filter" onclick="openFilter('pattern')">
+            <span class="filter-label">Pattern</span>
+            <span class="filter-value" id="patternValue">Any pattern</span>
+        </button>
 
+    </div>
 
-        <!-- FILTERS -->
-        <div class="filters">
+    <div class="price-row">
 
-            <div class="filter" onclick="selectFilter('Collection')">
-                <div class="filter-label">COLLECTION</div>
-                <div class="filter-value" id="collectionFilter">
-                    All collections
-                </div>
-            </div>
+        <input
+            id="numberInput"
+            class="number-input"
+            type="number"
+            placeholder="Gift number"
+        >
 
-            <div class="filter" onclick="selectFilter('Model')">
-                <div class="filter-label">MODEL</div>
-                <div class="filter-value" id="modelFilter">
-                    All models
-                </div>
-            </div>
+        <input
+            id="priceInput"
+            class="number-input"
+            type="number"
+            placeholder="Max price, TON"
+        >
 
-            <div class="filter" onclick="selectFilter('Marketplace')">
-                <div class="filter-label">MARKETPLACE</div>
-                <div class="filter-value" id="marketFilter">
-                    All markets
-                </div>
-            </div>
+    </div>
 
-            <div class="filter" onclick="selectFilter('Price')">
-                <div class="filter-label">MAX PRICE</div>
-                <div class="filter-value" id="priceFilter">
-                    Any price
-                </div>
-            </div>
+    <button class="filter" style="margin-bottom: 14px;" onclick="openFilter('marketplace')">
+        <span class="filter-label">Marketplace</span>
+        <span class="filter-value" id="marketplaceValue">All marketplaces</span>
+    </button>
 
-        </div>
+    <button class="search-button" onclick="runSearch()">
+        🔎 Search gifts
+    </button>
 
-    </section>
+    <div class="results-header">
+        <div class="results-title">Best opportunities</div>
+        <div class="results-count" id="resultsCount">3 results</div>
+    </div>
 
+    <div id="results">
 
-    <!-- OPPORTUNITIES -->
-    <section>
+        <div class="gift-card" data-search="plush pepe pepe 1842">
 
-        <div class="section-header">
+            <div class="gift-top">
 
-            <div class="section-title">
-                Market opportunities
-            </div>
-
-            <div
-                class="section-link"
-                onclick="showAll()"
-            >
-                View all
-            </div>
-
-        </div>
-
-
-        <div class="cards">
-
-            <!-- CARD 1 -->
-            <div class="gift-card">
-
-                <div class="gift-image">
-                    🧸
-                </div>
+                <div class="gift-image">🐸</div>
 
                 <div class="gift-info">
-                    <div class="gift-name">
-                        Plush Pepe #1842
-                    </div>
-
-                    <div class="gift-market">
-                        Portals · Listed now
+                    <div class="gift-name">Plush Pepe #1842</div>
+                    <div class="gift-details">
+                        Plush Pepe · Model #1842
                     </div>
                 </div>
 
-                <div class="gift-right">
-
-                    <div class="gift-price">
-                        18.4 TON
-                    </div>
-
-                    <div class="gift-change">
-                        ↓ 6.2% below floor
-                    </div>
-
+                <div class="gift-price">
+                    <div class="price-main">18.4 TON</div>
+                    <div class="price-ton">best price</div>
+                    <div class="deal">↓ 6.2% below floor</div>
                 </div>
 
             </div>
 
+            <div class="markets">
 
-            <!-- CARD 2 -->
-            <div class="gift-card">
-
-                <div class="gift-image">
-                    💗
+                <div class="market-item">
+                    <div class="market-name">PORTALS</div>
+                    <div class="market-price best">18.4 TON</div>
                 </div>
 
-                <div class="gift-info">
-                    <div class="gift-name">
-                        Heart Locket #529
-                    </div>
-
-                    <div class="gift-market">
-                        MRKT · Listed now
-                    </div>
+                <div class="market-item">
+                    <div class="market-name">MRKT</div>
+                    <div class="market-price">19.1 TON</div>
                 </div>
 
-                <div class="gift-right">
-
-                    <div class="gift-price">
-                        12.7 TON
-                    </div>
-
-                    <div class="gift-change">
-                        ↓ 4.8% below floor
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- CARD 3 -->
-            <div class="gift-card">
-
-                <div class="gift-image">
-                    🐱
-                </div>
-
-                <div class="gift-info">
-                    <div class="gift-name">
-                        Scared Cat #9100
-                    </div>
-
-                    <div class="gift-market">
-                        TONNEL · Listed now
-                    </div>
-                </div>
-
-                <div class="gift-right">
-
-                    <div class="gift-price">
-                        24.1 TON
-                    </div>
-
-                    <div class="gift-change">
-                        ↓ 3.1% below floor
-                    </div>
-
+                <div class="market-item">
+                    <div class="market-name">TONNEL</div>
+                    <div class="market-price">20.0 TON</div>
                 </div>
 
             </div>
 
         </div>
 
-    </section>
+        <div class="gift-card" data-search="heart locket 529">
+
+            <div class="gift-top">
+
+                <div class="gift-image">💝</div>
+
+                <div class="gift-info">
+                    <div class="gift-name">Heart Locket #529</div>
+                    <div class="gift-details">
+                        Heart Locket · Model #529
+                    </div>
+                </div>
+
+                <div class="gift-price">
+                    <div class="price-main">12.7 TON</div>
+                    <div class="price-ton">best price</div>
+                    <div class="deal">↓ 4.8% below floor</div>
+                </div>
+
+            </div>
+
+            <div class="markets">
+
+                <div class="market-item">
+                    <div class="market-name">PORTALS</div>
+                    <div class="market-price">13.4 TON</div>
+                </div>
+
+                <div class="market-item">
+                    <div class="market-name">MRKT</div>
+                    <div class="market-price best">12.7 TON</div>
+                </div>
+
+                <div class="market-item">
+                    <div class="market-name">TONNEL</div>
+                    <div class="market-price">14.0 TON</div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="gift-card" data-search="scared cat 9100 cat">
+
+            <div class="gift-top">
+
+                <div class="gift-image">🐱</div>
+
+                <div class="gift-info">
+                    <div class="gift-name">Scared Cat #9100</div>
+                    <div class="gift-details">
+                        Scared Cat · Model #9100
+                    </div>
+                </div>
+
+                <div class="gift-price">
+                    <div class="price-main">24.1 TON</div>
+                    <div class="price-ton">best price</div>
+                    <div class="deal">↓ 3.1% below floor</div>
+                </div>
+
+            </div>
+
+            <div class="markets">
+
+                <div class="market-item">
+                    <div class="market-name">PORTALS</div>
+                    <div class="market-price">25.0 TON</div>
+                </div>
+
+                <div class="market-item">
+                    <div class="market-name">MRKT</div>
+                    <div class="market-price">24.8 TON</div>
+                </div>
+
+                <div class="market-item">
+                    <div class="market-name">TONNEL</div>
+                    <div class="market-price best">24.1 TON</div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
-
 
 <!-- BOTTOM NAV -->
 
 <nav class="bottom-nav">
 
-    <button
-        class="nav-item active"
-        onclick="navigate('home', this)"
-    >
-        <span class="nav-item-icon">⌂</span>
+    <button class="nav-button" onclick="goHome()">
+        <span>⌂</span>
         Home
     </button>
 
-    <button
-        class="nav-item"
-        onclick="navigate('search', this)"
-    >
-        <span class="nav-item-icon">⌕</span>
+    <button class="nav-button active">
+        <span>⌕</span>
         Search
     </button>
 
-    <button
-        class="nav-item"
-        onclick="navigate('scanner', this)"
-    >
-        <span class="nav-item-icon">◈</span>
+    <button class="nav-button" onclick="showMessage('Scanner will monitor new listings and price opportunities.')">
+        <span>◈</span>
         Scanner
     </button>
 
-    <button
-        class="nav-item"
-        onclick="navigate('alerts', this)"
-    >
-        <span class="nav-item-icon">♢</span>
+    <button class="nav-button" onclick="showMessage('Your saved searches and price alerts will appear here.')">
+        <span>♢</span>
         Alerts
     </button>
 
 </nav>
 
+<!-- FILTER POPUP -->
+
+<div class="popup" id="popup">
+
+    <div class="popup-content">
+
+        <div class="popup-title" id="popupTitle">
+            Select option
+        </div>
+
+        <div id="popupOptions"></div>
+
+        <button class="close-popup" onclick="closePopup()">
+            Cancel
+        </button>
+
+    </div>
+
+</div>
 
 <script>
 
-    /*
-     * ============================================
-     * TELEGRAM MINI APP INITIALIZATION
-     * ============================================
-     */
-
-    const tg = window.Telegram && window.Telegram.WebApp
-        ? window.Telegram.WebApp
-        : null;
-
+    const tg = window.Telegram?.WebApp;
 
     if (tg) {
-
-        // Tell Telegram that the app is ready.
         tg.ready();
-
-        // Expand the Mini App to available height.
         tg.expand();
 
-        // Apply Telegram colors when available.
-        if (tg.themeParams) {
-
-            const root = document.documentElement;
-
-            if (tg.themeParams.bg_color) {
-                root.style.setProperty(
-                    "--telegram-bg",
-                    tg.themeParams.bg_color
-                );
-            }
-
+        if (tg.setHeaderColor) {
+            tg.setHeaderColor("#08090d");
         }
 
+        if (tg.setBackgroundColor) {
+            tg.setBackgroundColor("#08090d");
+        }
     }
 
+    const filters = {
+        collection: [
+            "All collections",
+            "Plush Pepe",
+            "Heart Locket",
+            "Scared Cat",
+            "Durov's Cap"
+        ],
 
-    /*
-     * ============================================
-     * SEARCH
-     * ============================================
-     */
+        model: [
+            "Any model",
+            "Classic",
+            "Rare",
+            "Limited"
+        ],
 
-    function performSearch() {
+        backdrop: [
+            "Any backdrop",
+            "Black",
+            "Purple",
+            "Blue",
+            "Golden"
+        ],
 
-        const input = document.getElementById("searchInput");
-        const value = input.value.trim();
+        pattern: [
+            "Any pattern",
+            "Classic",
+            "Stars",
+            "Lines",
+            "Gradient"
+        ],
 
-        if (!value) {
+        marketplace: [
+            "All marketplaces",
+            "Portals",
+            "MRKT",
+            "TONNEL",
+            "Fragment",
+            "GetGems"
+        ]
+    };
 
-            if (tg && tg.showPopup) {
+    const labels = {
+        collection: "Collection",
+        model: "Model",
+        backdrop: "Backdrop",
+        pattern: "Pattern",
+        marketplace: "Marketplace"
+    };
 
-                tg.showPopup({
-                    title: "Search",
-                    message: "Enter a gift, collection or number.",
-                    buttons: [
-                        {
-                            type: "ok"
-                        }
-                    ]
-                });
+    function openFilter(type) {
 
+        const popup = document.getElementById("popup");
+        const title = document.getElementById("popupTitle");
+        const options = document.getElementById("popupOptions");
+
+        title.textContent = labels[type];
+
+        options.innerHTML = "";
+
+        filters[type].forEach(option => {
+
+            const button = document.createElement("button");
+
+            button.className = "popup-option";
+            button.textContent = option;
+
+            button.onclick = () => {
+
+                document.getElementById(type + "Value").textContent = option;
+
+                closePopup();
+
+                if (tg?.HapticFeedback) {
+                    tg.HapticFeedback.selectionChanged();
+                }
+            };
+
+            options.appendChild(button);
+
+        });
+
+        popup.classList.add("active");
+    }
+
+    function closePopup() {
+        document.getElementById("popup").classList.remove("active");
+    }
+
+    function runSearch() {
+
+        const query =
+            document.getElementById("searchInput")
+                .value
+                .trim()
+                .toLowerCase();
+
+        const cards =
+            document.querySelectorAll(".gift-card");
+
+        let visible = 0;
+
+        cards.forEach(card => {
+
+            const text =
+                card.dataset.search.toLowerCase();
+
+            if (!query || text.includes(query)) {
+                card.style.display = "block";
+                visible++;
             } else {
-
-                alert("Enter a gift, collection or number.");
-
-            }
-
-            return;
-        }
-
-
-        console.log("Tonavio search:", value);
-
-
-        if (tg && tg.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred("light");
-        }
-
-
-        if (tg && tg.showPopup) {
-
-            tg.showPopup({
-                title: "Search",
-                message: `Searching for "${value}"`,
-                buttons: [
-                    {
-                        type: "ok"
-                    }
-                ]
-            });
-
-        } else {
-
-            alert(`Searching for "${value}"`);
-
-        }
-
-    }
-
-
-    /*
-     * ENTER KEY SEARCH
-     */
-
-    document
-        .getElementById("searchInput")
-        .addEventListener("keydown", function(event) {
-
-            if (event.key === "Enter") {
-                performSearch();
+                card.style.display = "none";
             }
 
         });
 
+        document.getElementById("resultsCount").textContent =
+            visible + (visible === 1 ? " result" : " results");
 
-    /*
-     * ============================================
-     * FILTERS
-     * ============================================
-     */
-
-    function selectFilter(type) {
-
-        if (tg && tg.HapticFeedback) {
-            tg.HapticFeedback.selectionChanged();
-        }
-
-
-        let message = "";
-
-        if (type === "Collection") {
-            message = "Collection filter will be connected to the Tonavio database next.";
-        }
-
-        if (type === "Model") {
-            message = "Model filter will be connected to the Tonavio database next.";
-        }
-
-        if (type === "Marketplace") {
-            message = "Marketplace filter will be connected to the Tonavio database next.";
-        }
-
-        if (type === "Price") {
-            message = "Price filter will be connected to the Tonavio database next.";
-        }
-
-
-        if (tg && tg.showPopup) {
-
-            tg.showPopup({
-                title: type,
-                message: message,
-                buttons: [
-                    {
-                        type: "ok"
-                    }
-                ]
-            });
-
-        } else {
-
-            alert(message);
-
-        }
-
-    }
-
-
-    /*
-     * ============================================
-     * PROFILE
-     * ============================================
-     */
-
-    function showProfile() {
-
-        if (tg && tg.HapticFeedback) {
+        if (tg?.HapticFeedback) {
             tg.HapticFeedback.impactOccurred("light");
         }
+    }
 
+    function showMessage(message) {
 
-        let message = "Tonavio profile";
+        alert(message);
 
-
-        if (
-            tg &&
-            tg.initDataUnsafe &&
-            tg.initDataUnsafe.user
-        ) {
-
-            const user = tg.initDataUnsafe.user;
-
-            const name =
-                user.first_name ||
-                "Telegram user";
-
-            message =
-                `Hello, ${name}!\\n\\n` +
-                "Your Tonavio account will appear here.";
-
+        if (tg?.HapticFeedback) {
+            tg.HapticFeedback.notificationOccurred("success");
         }
+    }
 
+    function goHome() {
 
-        if (tg && tg.showPopup) {
-
-            tg.showPopup({
-                title: "Profile",
-                message: message,
-                buttons: [
-                    {
-                        type: "ok"
-                    }
-                ]
-            });
-
-        } else {
-
-            alert(message);
-
-        }
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
 
     }
 
+    document.getElementById("searchInput")
+        .addEventListener("keydown", function(event) {
 
-    /*
-     * ============================================
-     * BOTTOM NAVIGATION
-     * ============================================
-     */
+            if (event.key === "Enter") {
+                runSearch();
+            }
 
-    function navigate(section, button) {
+        });
 
-        document
-            .querySelectorAll(".nav-item")
-            .forEach(function(item) {
+    document.getElementById("popup")
+        .addEventListener("click", function(event) {
 
-                item.classList.remove("active");
+            if (event.target === this) {
+                closePopup();
+            }
 
-            });
-
-
-        button.classList.add("active");
-
-
-        if (tg && tg.HapticFeedback) {
-            tg.HapticFeedback.selectionChanged();
-        }
-
-
-        let message = "";
-
-
-        if (section === "home") {
-            message = "Tonavio Home";
-        }
-
-        if (section === "search") {
-            document
-                .getElementById("searchInput")
-                .focus();
-
-            return;
-        }
-
-        if (section === "scanner") {
-            message = "Scanner will be connected to live marketplace data next.";
-        }
-
-        if (section === "alerts") {
-            message = "Your price alerts will appear here.";
-        }
-
-
-        if (tg && tg.showPopup) {
-
-            tg.showPopup({
-                title: "Tonavio",
-                message: message,
-                buttons: [
-                    {
-                        type: "ok"
-                    }
-                ]
-            });
-
-        } else {
-
-            alert(message);
-
-        }
-
-    }
-
-
-    /*
-     * ============================================
-     * VIEW ALL
-     * ============================================
-     */
-
-    function showAll() {
-
-        if (tg && tg.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred("light");
-        }
-
-
-        if (tg && tg.showPopup) {
-
-            tg.showPopup({
-                title: "Market opportunities",
-                message: "The full opportunities list will be connected to live market data next.",
-                buttons: [
-                    {
-                        type: "ok"
-                    }
-                ]
-            });
-
-        } else {
-
-            alert(
-                "The full opportunities list will be connected to live market data next."
-            );
-
-        }
-
-    }
+        });
 
 </script>
 
