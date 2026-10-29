@@ -935,6 +935,14 @@
             }
 
         });
+        fetch("https://tonavio.onrender.com/health")
+            .then(response => response.json())
+            .then(data => {
+                console.log("Tonavio API:", data);
+            })
+            .catch(error => {
+                console.error("Tonavio API error:", error);
+            });
 
 </script>
 
