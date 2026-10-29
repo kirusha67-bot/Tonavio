@@ -867,38 +867,116 @@
 
     function runSearch() {
 
-        const query =
-            document.getElementById("searchInput")
-                .value
-                .trim()
-                .toLowerCase();
+    const query =
+        document.getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
 
-        const cards =
-            document.querySelectorAll(".gift-card");
+    fetch("https://tonavio.onrender.com/gifts")
+        .then(response => {
 
-        let visible = 0;
-
-        cards.forEach(card => {
-
-            const text =
-                card.dataset.search.toLowerCase();
-
-            if (!query || text.includes(query)) {
-                card.style.display = "block";
-                visible++;
-            } else {
-                card.style.display = "none";
+            if (!response.ok) {
+                throw new Error("API error: " + response.status);
             }
 
+            return response.json();
+        })
+        .then(data => {
+
+            const cards =
+                document.querySelectorAll(".gift-card");
+
+            data.gifts.forEach((gift, index) => {
+
+                const card = cards[index];
+
+                if (!card) return;
+
+                card.dataset.search =
+                    `${gift.name} ${gift.number} ${gift.marketplace}`
+                        .toLowerCase();
+
+                card.querySelector(".gift-name").textContent =
+                    `${gift.name} #${gift.number}`;
+
+                card.querySelector(".gift-details").textContent =
+                    `${gift.name} · ${gift.marketplace}`;
+
+                card.querySelector(".price-main").textContent =
+                    `${gift.price} ${gift.currency}`;
+
+                const marketItems =
+                    card.querySelectorAll(".market-item");
+
+                marketItems.forEach(item => {
+                    item.style.display = "none";
+                });
+
+                if (marketItems[0]) {
+
+                    marketItems[0].style.display = "block";
+
+                    marketItems[0]
+                        .querySelector(".market-name")
+                        .textContent =
+                        gift.marketplace.toUpperCase();
+
+                    marketItems[0]
+                        .querySelector(".market-price")
+                        .textContent =
+                        `${gift.price} ${gift.currency}`;
+                }
+
+                const deal =
+                    card.querySelector(".deal");
+
+                if (deal) {
+                    deal.style.display = "none";
+                }
+
+                if (!query ||
+                    card.dataset.search.includes(query)) {
+
+                    card.style.display = "block";
+
+                } else {
+
+                    card.style.display = "none";
+                }
+
+            });
+
+            for (
+                let i = data.gifts.length;
+                i < cards.length;
+                i++
+            ) {
+                cards[i].style.display = "none";
+            }
+
+            const visible =
+                [...cards].filter(
+                    card => card.style.display !== "none"
+                ).length;
+
+            document.getElementById("resultsCount").textContent =
+                visible +
+                (visible === 1 ? " result" : " results");
+
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred("light");
+            }
+
+        })
+        .catch(error => {
+
+            console.error("Tonavio API error:", error);
+
+            document.getElementById("resultsCount").textContent =
+                "API error";
         });
-
-        document.getElementById("resultsCount").textContent =
-            visible + (visible === 1 ? " result" : " results");
-
-        if (tg?.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred("light");
-        }
-    }
+}
 
     function showMessage(message) {
 
