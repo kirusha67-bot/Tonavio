@@ -34,23 +34,59 @@ async def gifts():
             {
                 "name": "Plush Pepe",
                 "number": 1842,
-                "price": 18.4,
                 "currency": "TON",
-                "marketplace": "Portals"
+                "marketplaces": [
+                    {
+                        "name": "Portals",
+                        "price": 18.4
+                    },
+                    {
+                        "name": "MRKT",
+                        "price": 19.1
+                    },
+                    {
+                        "name": "TONNEL",
+                        "price": 20.0
+                    }
+                ]
             },
             {
                 "name": "Heart Locket",
                 "number": 529,
-                "price": 12.7,
                 "currency": "TON",
-                "marketplace": "MRKT"
+                "marketplaces": [
+                    {
+                        "name": "Portals",
+                        "price": 13.4
+                    },
+                    {
+                        "name": "MRKT",
+                        "price": 12.7
+                    },
+                    {
+                        "name": "TONNEL",
+                        "price": 14.2
+                    }
+                ]
             },
             {
                 "name": "Scared Cat",
                 "number": 9100,
-                "price": 24.1,
                 "currency": "TON",
-                "marketplace": "TONNEL"
+                "marketplaces": [
+                    {
+                        "name": "Portals",
+                        "price": 25.3
+                    },
+                    {
+                        "name": "MRKT",
+                        "price": 26.0
+                    },
+                    {
+                        "name": "TONNEL",
+                        "price": 24.1
+                    }
+                ]
             }
         ]
     }
