@@ -873,6 +873,9 @@
             .trim()
             .toLowerCase();
 
+    const results =
+        document.getElementById("results");
+
     fetch("https://tonavio.onrender.com/gifts")
         .then(response => {
 
@@ -884,81 +887,94 @@
         })
         .then(data => {
 
-            const cards =
-                document.querySelectorAll(".gift-card");
+            results.innerHTML = "";
 
-            data.gifts.forEach((gift, index) => {
+            let visible = 0;
 
-                const card = cards[index];
+            data.gifts.forEach(gift => {
 
-                if (!card) return;
-
-                card.dataset.search =
+                const searchText =
                     `${gift.name} ${gift.number} ${gift.marketplace}`
                         .toLowerCase();
 
-                card.querySelector(".gift-name").textContent =
-                    `${gift.name} #${gift.number}`;
-
-                card.querySelector(".gift-details").textContent =
-                    `${gift.name} · ${gift.marketplace}`;
-
-                card.querySelector(".price-main").textContent =
-                    `${gift.price} ${gift.currency}`;
-
-                const marketItems =
-                    card.querySelectorAll(".market-item");
-
-                marketItems.forEach(item => {
-                    item.style.display = "none";
-                });
-
-                if (marketItems[0]) {
-
-                    marketItems[0].style.display = "block";
-
-                    marketItems[0]
-                        .querySelector(".market-name")
-                        .textContent =
-                        gift.marketplace.toUpperCase();
-
-                    marketItems[0]
-                        .querySelector(".market-price")
-                        .textContent =
-                        `${gift.price} ${gift.currency}`;
+                if (query && !searchText.includes(query)) {
+                    return;
                 }
 
-                const deal =
-                    card.querySelector(".deal");
+                visible++;
 
-                if (deal) {
-                    deal.style.display = "none";
+                let icon = "🎁";
+
+                if (gift.name === "Plush Pepe") {
+                    icon = "🐸";
                 }
 
-                if (!query ||
-                    card.dataset.search.includes(query)) {
-
-                    card.style.display = "block";
-
-                } else {
-
-                    card.style.display = "none";
+                if (gift.name === "Heart Locket") {
+                    icon = "💝";
                 }
+
+                if (gift.name === "Scared Cat") {
+                    icon = "🐱";
+                }
+
+                const card =
+                    document.createElement("div");
+
+                card.className = "gift-card";
+
+                card.innerHTML = `
+                    <div class="gift-top">
+
+                        <div class="gift-image">
+                            ${icon}
+                        </div>
+
+                        <div class="gift-info">
+
+                            <div class="gift-name">
+                                ${gift.name} #${gift.number}
+                            </div>
+
+                            <div class="gift-details">
+                                ${gift.name} · #${gift.number}
+                            </div>
+
+                        </div>
+
+                        <div class="gift-price">
+
+                            <div class="price-main">
+                                ${gift.price} ${gift.currency}
+                            </div>
+
+                            <div class="price-ton">
+                                best price
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="markets">
+
+                        <div class="market-item">
+
+                            <div class="market-name">
+                                ${gift.marketplace.toUpperCase()}
+                            </div>
+
+                            <div class="market-price best">
+                                ${gift.price} ${gift.currency}
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+
+                results.appendChild(card);
 
             });
-
-            for (
-                let i = data.gifts.length;
-                i < cards.length;
-                i++
-            ) {
-                cards[i].style.display = "none";
-            }
-
-            const visible =
-                [...cards].filter(
-                    card => card.style.display !== "none"
-                ).length;
 
             document.getElementById("resultsCount").textContent =
                 visible +
@@ -972,6 +988,12 @@
         .catch(error => {
 
             console.error("Tonavio API error:", error);
+
+            results.innerHTML = `
+                <div class="gift-card">
+                    Не удалось загрузить подарки.
+                </div>
+            `;
 
             document.getElementById("resultsCount").textContent =
                 "API error";
