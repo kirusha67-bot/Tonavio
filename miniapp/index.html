@@ -849,6 +849,8 @@
 
                 closePopup();
 
+                runSearch();
+
                 if (tg?.HapticFeedback) {
                     tg.HapticFeedback.selectionChanged();
                 }
@@ -867,39 +869,198 @@
 
     function runSearch() {
 
-        const query =
-            document.getElementById("searchInput")
-                .value
-                .trim()
-                .toLowerCase();
+    const query =
+        document.getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
 
-        const cards =
-            document.querySelectorAll(".gift-card");
+    const selectedCollection =
+        document.getElementById("collectionValue")
+            .textContent
+            .trim()
+            .toLowerCase();
 
-        let visible = 0;
+    const selectedMarketplace =
+        document.getElementById("marketplaceValue")
+            .textContent
+            .trim()
+            .toLowerCase();
 
-        cards.forEach(card => {
+    const results =
+        document.getElementById("results");
 
-            const text =
-                card.dataset.search.toLowerCase();
+    fetch("https://tonavio.onrender.com/gifts")
+        .then(response => {
 
-            if (!query || text.includes(query)) {
-                card.style.display = "block";
-                visible++;
-            } else {
-                card.style.display = "none";
+            if (!response.ok) {
+                throw new Error("API error: " + response.status);
             }
 
+            return response.json();
+        })
+        .then(data => {
+
+            results.innerHTML = "";
+
+            let visible = 0;
+
+            data.gifts.forEach(gift => {
+
+                const giftName =
+                    gift.name.toLowerCase();
+
+                const searchText =
+                    `${gift.name} ${gift.number}`
+                        .toLowerCase();
+
+                const matchesQuery =
+                    !query ||
+                    searchText.includes(query);
+
+                const matchesCollection =
+                    selectedCollection === "all collections" ||
+                    giftName === selectedCollection;
+
+                if (!matchesQuery || !matchesCollection) {
+                    return;
+                }
+
+                let marketplacesToShow =
+                    gift.marketplaces;
+
+                if (
+                    selectedMarketplace !==
+                    "all marketplaces"
+                ) {
+                    marketplacesToShow =
+                        gift.marketplaces.filter(
+                            marketplace =>
+                                marketplace.name
+                                    .toLowerCase() ===
+                                selectedMarketplace
+                        );
+                }
+
+                if (marketplacesToShow.length === 0) {
+                    return;
+                }
+
+                visible++;
+
+                let icon = "🎁";
+
+                if (gift.name === "Plush Pepe") {
+                    icon = "🐸";
+                } else if (gift.name === "Heart Locket") {
+                    icon = "💝";
+                } else if (gift.name === "Scared Cat") {
+                    icon = "🐱";
+                }
+
+                const bestPrice =
+                    Math.min(
+                        ...gift.marketplaces.map(
+                            marketplace =>
+                                marketplace.price
+                        )
+                    );
+
+                const card =
+                    document.createElement("div");
+
+                card.className = "gift-card";
+
+                card.innerHTML = `
+                    <div class="gift-top">
+
+                        <div class="gift-image">
+                            ${icon}
+                        </div>
+
+                        <div class="gift-info">
+
+                            <div class="gift-name">
+                                ${gift.name} #${gift.number}
+                            </div>
+
+                            <div class="gift-details">
+                                ${gift.name} · #${gift.number}
+                            </div>
+
+                        </div>
+
+                        <div class="gift-price">
+
+                            <div class="price-main">
+                                ${bestPrice} ${gift.currency}
+                            </div>
+
+                            <div class="price-ton">
+                                best price
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="markets">
+
+                        ${marketplacesToShow.map(
+                            marketplace => `
+
+                            <div class="market-item">
+
+                                <div class="market-name">
+                                    ${marketplace.name.toUpperCase()}
+                                </div>
+
+                                <div class="market-price ${
+                                    marketplace.price === bestPrice
+                                        ? "best"
+                                        : ""
+                                }">
+                                    ${marketplace.price}
+                                    ${gift.currency}
+                                </div>
+
+                            </div>
+
+                        `).join("")}
+
+                    </div>
+                `;
+
+                results.appendChild(card);
+
+            });
+
+            document.getElementById("resultsCount").textContent =
+                visible +
+                (visible === 1 ? " result" : " results");
+
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred("light");
+            }
+
+        })
+        .catch(error => {
+
+            console.error(
+                "Tonavio API error:",
+                error
+            );
+
+            results.innerHTML = `
+                <div class="gift-card">
+                    Не удалось загрузить подарки.
+                </div>
+            `;
+
+            document.getElementById("resultsCount").textContent =
+                "API error";
         });
-
-        document.getElementById("resultsCount").textContent =
-            visible + (visible === 1 ? " result" : " results");
-
-        if (tg?.HapticFeedback) {
-            tg.HapticFeedback.impactOccurred("light");
-        }
-    }
-
+}
     function showMessage(message) {
 
         alert(message);
