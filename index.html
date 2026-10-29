@@ -849,7 +849,7 @@
 
                 closePopup();
 
-                 runSearch();
+                runSearch();
 
                 if (tg?.HapticFeedback) {
                     tg.HapticFeedback.selectionChanged();
@@ -867,7 +867,7 @@
         document.getElementById("popup").classList.remove("active");
     }
 
-    function runSearch() {
+   function runSearch() {
 
     const query =
         document.getElementById("searchInput")
@@ -878,11 +878,13 @@
     const selectedCollection =
         document.getElementById("collectionValue")
             .textContent
+            .trim()
             .toLowerCase();
 
     const selectedMarketplace =
         document.getElementById("marketplaceValue")
             .textContent
+            .trim()
             .toLowerCase();
 
     const results =
@@ -908,11 +910,8 @@
                 const giftName =
                     gift.name.toLowerCase();
 
-                const marketplace =
-                    gift.marketplace.toLowerCase();
-
                 const searchText =
-                    `${gift.name} ${gift.number} ${gift.marketplace}`
+                    `${gift.name} ${gift.number}`
                         .toLowerCase();
 
                 const matchesQuery =
@@ -923,15 +922,27 @@
                     selectedCollection === "all collections" ||
                     giftName === selectedCollection;
 
-                const matchesMarketplace =
-                    selectedMarketplace === "all marketplaces" ||
-                    marketplace === selectedMarketplace;
+                if (!matchesQuery || !matchesCollection) {
+                    return;
+                }
+
+                let marketplacesToShow =
+                    gift.marketplaces;
 
                 if (
-                    !matchesQuery ||
-                    !matchesCollection ||
-                    !matchesMarketplace
+                    selectedMarketplace !==
+                    "all marketplaces"
                 ) {
+                    marketplacesToShow =
+                        gift.marketplaces.filter(
+                            marketplace =>
+                                marketplace.name
+                                    .toLowerCase() ===
+                                selectedMarketplace
+                        );
+                }
+
+                if (marketplacesToShow.length === 0) {
                     return;
                 }
 
@@ -947,6 +958,14 @@
                     icon = "🐱";
                 }
 
+                const bestPrice =
+                    Math.min(
+                        ...gift.marketplaces.map(
+                            marketplace =>
+                                marketplace.price
+                        )
+                    );
+
                 const card =
                     document.createElement("div");
 
@@ -954,13 +973,11 @@
 
                 card.innerHTML = `
                     <div class="gift-top">
-
                         <div class="gift-image">
                             ${icon}
                         </div>
 
                         <div class="gift-info">
-
                             <div class="gift-name">
                                 ${gift.name} #${gift.number}
                             </div>
@@ -968,42 +985,41 @@
                             <div class="gift-details">
                                 ${gift.name} · #${gift.number}
                             </div>
-
                         </div>
 
                         <div class="gift-price">
-
                             <div class="price-main">
-                                ${gift.price} ${gift.currency}
+                                ${bestPrice} ${gift.currency}
                             </div>
 
                             <div class="price-ton">
                                 best price
                             </div>
-
                         </div>
-
                     </div>
 
                     <div class="markets">
+                        ${marketplacesToShow.map(
+                            marketplace => `
+                            <div class="market-item">
+                                <div class="market-name">
+                                    ${marketplace.name.toUpperCase()}
+                                </div>
 
-                        <div class="market-item">
-
-                            <div class="market-name">
-                                ${gift.marketplace.toUpperCase()}
+                                <div class="market-price ${
+                                    marketplace.price === bestPrice
+                                        ? "best"
+                                        : ""
+                                }">
+                                    ${marketplace.price}
+                                    ${gift.currency}
+                                </div>
                             </div>
-
-                            <div class="market-price best">
-                                ${gift.price} ${gift.currency}
-                            </div>
-
-                        </div>
-
+                        `).join("")}
                     </div>
                 `;
 
                 results.appendChild(card);
-
             });
 
             document.getElementById("resultsCount").textContent =
@@ -1017,7 +1033,10 @@
         })
         .catch(error => {
 
-            console.error("Tonavio API error:", error);
+            console.error(
+                "Tonavio API error:",
+                error
+            );
 
             results.innerHTML = `
                 <div class="gift-card">
@@ -1029,7 +1048,6 @@
                 "API error";
         });
 }
-
     function showMessage(message) {
 
         alert(message);
@@ -1065,14 +1083,6 @@
             }
 
         });
-        fetch("https://tonavio.onrender.com/health")
-            .then(response => response.json())
-            .then(data => {
-                console.log("Tonavio API:", data);
-            })
-            .catch(error => {
-                console.error("Tonavio API error:", error);
-            });
 
 </script>
 
