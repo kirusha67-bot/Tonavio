@@ -74,9 +74,11 @@ background:linear-gradient(145deg,#B8FF65 0%,#42E8E0 48%,#087C86 100%);box-shado
 .sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .sheet-title{font-size:18px;font-weight:800}
 .sheet-close{border:0;background:rgba(66,232,224,.12);color:var(--cyan);border-radius:12px;padding:8px 11px}
-.field-label{display:block;color:var(--muted);font-size:11px;margin:13px 0 7px}
-.field-input,.field-select{width:100%;padding:13px;border:1px solid rgba(66,232,224,.23);border-radius:12px;background:#0B252D;color:var(--text);outline:none}
-.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-label{display:block;color:var(--muted);font-size:12px;font-weight:700;margin:16px 0 8px}
+.field-input,.field-select{display:block;box-sizing:border-box;width:100%;min-width:0;height:50px;padding:0 15px;border:1px solid rgba(66,232,224,.28);border-radius:14px;background:#0B252D;color:var(--text);font:inherit;font-size:15px;line-height:1.2;outline:none}
+.field-select{appearance:none;-webkit-appearance:none;padding-right:38px;background-image:linear-gradient(45deg,transparent 50%,#42E8E0 50%),linear-gradient(135deg,#42E8E0 50%,transparent 50%);background-position:calc(100% - 19px) 21px,calc(100% - 14px) 21px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.field-input:focus,.field-select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(66,232,224,.10)}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .apply-btn{width:100%;margin-top:17px;border:0;border-radius:14px;padding:14px;background:linear-gradient(100deg,var(--cyan),var(--lime));color:#062329;font-weight:850}
 
 /* Header profile control: enlarged without changing its position or visual identity */
