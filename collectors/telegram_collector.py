@@ -18,7 +18,7 @@ PORTALS_BASE_URL = "https://portal-market.com/partners"
 
 def _get_portals_data(endpoint: str):
     if not PORTALS_API_KEY:
-        raise ValueError("PORTALS_API_KEY не найден в .env")
+        raise ValueError("PORTALS_API_KEY не найден")
 
     request = Request(
         f"{PORTALS_BASE_URL}{endpoint}",
@@ -34,23 +34,20 @@ def _get_portals_data(endpoint: str):
         with urlopen(request, timeout=20) as response:
             return json.loads(response.read().decode("utf-8"))
 
-except HTTPError as error:
+    except HTTPError as error:
+        response_body = error.read().decode(
+            "utf-8",
+            errors="replace"
+        )
 
-response_body = error.read().decode("utf-8", errors="replace")
+        print("PORTALS HTTP STATUS:", error.code)
+        print("PORTALS SERVER:", error.headers.get("Server"))
+        print("PORTALS RESPONSE:", response_body[:1000])
 
-print("PORTALS HTTP STATUS:", error.code)
-
-print("PORTALS SERVER:", error.headers.get("Server"))
-
-print("PORTALS RESPONSE:", response_body[:1000])
-
-raise RuntimeError(
-
-    f"Portals API вернул HTTP-ошибку: {error.code}. "
-
-    f"Ответ сервера: {response_body[:500]}"
-
-) from None
+        raise RuntimeError(
+            f"Portals API вернул HTTP-ошибку: {error.code}. "
+            f"Ответ сервера: {response_body[:500]}"
+        ) from None
 
     except URLError as error:
         raise RuntimeError(
@@ -59,14 +56,13 @@ raise RuntimeError(
 
 
 async def collect_gifts():
-    """Получает флоры коллекций и уникальных атрибутов из Portals."""
+    """Получает реальные данные о флорах Portals."""
 
     collection_floors = await asyncio.to_thread(
         _get_portals_data,
         "/collections/floors",
     )
 
-    # Соблюдаем ограничение API: не более одного запроса в секунду.
     await asyncio.sleep(1.1)
 
     attribute_floors = await asyncio.to_thread(
