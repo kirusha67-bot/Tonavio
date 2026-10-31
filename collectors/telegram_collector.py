@@ -34,10 +34,23 @@ def _get_portals_data(endpoint: str):
         with urlopen(request, timeout=20) as response:
             return json.loads(response.read().decode("utf-8"))
 
-    except HTTPError as error:
-        raise RuntimeError(
-            f"Portals API вернул HTTP-ошибку: {error.code}"
-        ) from None
+except HTTPError as error:
+
+response_body = error.read().decode("utf-8", errors="replace")
+
+print("PORTALS HTTP STATUS:", error.code)
+
+print("PORTALS SERVER:", error.headers.get("Server"))
+
+print("PORTALS RESPONSE:", response_body[:1000])
+
+raise RuntimeError(
+
+    f"Portals API вернул HTTP-ошибку: {error.code}. "
+
+    f"Ответ сервера: {response_body[:500]}"
+
+) from None
 
     except URLError as error:
         raise RuntimeError(
