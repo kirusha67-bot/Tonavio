@@ -867,7 +867,7 @@
         document.getElementById("popup").classList.remove("active");
     }
 
-    function runSearch() {
+   function runSearch() {
 
     const query =
         document.getElementById("searchInput")
@@ -973,13 +973,11 @@
 
                 card.innerHTML = `
                     <div class="gift-top">
-
                         <div class="gift-image">
                             ${icon}
                         </div>
 
                         <div class="gift-info">
-
                             <div class="gift-name">
                                 ${gift.name} #${gift.number}
                             </div>
@@ -987,11 +985,9 @@
                             <div class="gift-details">
                                 ${gift.name} · #${gift.number}
                             </div>
-
                         </div>
 
                         <div class="gift-price">
-
                             <div class="price-main">
                                 ${bestPrice} ${gift.currency}
                             </div>
@@ -999,18 +995,13 @@
                             <div class="price-ton">
                                 best price
                             </div>
-
                         </div>
-
                     </div>
 
                     <div class="markets">
-
                         ${marketplacesToShow.map(
                             marketplace => `
-
                             <div class="market-item">
-
                                 <div class="market-name">
                                     ${marketplace.name.toUpperCase()}
                                 </div>
@@ -1023,16 +1014,12 @@
                                     ${marketplace.price}
                                     ${gift.currency}
                                 </div>
-
                             </div>
-
                         `).join("")}
-
                     </div>
                 `;
 
                 results.appendChild(card);
-
             });
 
             document.getElementById("resultsCount").textContent =
