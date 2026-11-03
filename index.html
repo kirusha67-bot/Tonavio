@@ -165,7 +165,17 @@ background:linear-gradient(145deg,#B8FF65 0%,#42E8E0 48%,#087C86 100%);box-shado
   <section class="sheet">
     <div class="sheet-head"><div class="sheet-title">◇ Portals Market</div><button class="sheet-close" id="closeMarket">Close ✕</button></div>
     <p style="color:#9AB7BD;font-size:11px;line-height:1.5;margin:0 0 13px">Актуальные минимальные цены коллекций из Portals. Это ориентиры флора, не отдельные объявления.</p>
-    <input class="field-input" id="marketSearch" type="search" placeholder="Search collections..." autocomplete="off">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-bottom:9px">
+      <button class="chip active" id="marketTabCollections" type="button">Collections</button>
+      <button class="chip" id="marketTabModels" type="button">Models</button>
+    </div>
+    <div id="marketCollectionControls">
+      <input class="field-input" id="marketSearch" type="search" placeholder="Search collections..." autocomplete="off">
+    </div>
+    <div id="marketModelControls" style="display:none">
+      <select class="field-select" id="marketCollectionSelect" style="margin-bottom:9px"><option value="">Choose collection</option></select>
+      <input class="field-input" id="marketModelSearch" type="search" placeholder="Search models..." autocomplete="off">
+    </div>
     <div id="marketMeta" style="color:#83AAB1;font-size:10px;margin:10px 2px">Loading Portals data…</div>
     <div id="marketList" style="display:grid;gap:8px"></div>
   </section>
@@ -383,40 +393,64 @@ document.querySelectorAll("[data-nav]").forEach(btn=>btn.addEventListener("click
 
 
 let marketCollections = [];
+let marketAttributes = {};
 let marketLoadedAt = null;
+let marketTab = "collections";
 function prettifySlug(slug) {
   const known = {"heartlocket":"Heart Locket","plushpepe":"Plush Pepe","scaredcat":"Scared Cat","freshsocks":"Fresh Socks","icecream":"Ice Cream","instantramen":"Instant Ramen","snakebox":"Snake Box","poolfloat":"Pool Float","vicecream":"Vice Cream","chillflame":"Chill Flame","bigyear":"Big Year","lolpop":"Lol Pop","xmasstocking":"Xmas Stocking","winterwreath":"Winter Wreath","magicpotion":"Magic Potion","durovsglasses":"Durov's Glasses"};
   if(known[slug]) return known[slug];
   return slug.replace(/([a-z])([A-Z])/g,"$1 $2").replace(/[-_]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
+}
+function marketRow(name,price,kind) {
+  const row=document.createElement("div");
+  row.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;border:1px solid rgba(66,232,224,.2);border-radius:13px;background:rgba(2,19,25,.48)";
+  row.innerHTML=`<span style="font-size:12px;font-weight:700;min-width:0;overflow-wrap:anywhere">${escapeHTML(name)}</span><strong style="font-size:13px;color:var(--lime);white-space:nowrap">${money(price)} TON</strong>`;
+  $("marketList").appendChild(row);
 }
 function renderMarketFloors() {
   const q = $("marketSearch").value.trim().toLowerCase();
   const list = marketCollections.filter(x=>x.name.toLowerCase().includes(q)).sort((a,b)=>a.price-b.price);
   $("marketMeta").textContent = marketLoadedAt ? `${list.length} из ${marketCollections.length} коллекций · обновлено ${marketLoadedAt.toLocaleTimeString()}` : "Portals";
   $("marketList").innerHTML = "";
-  if(!list.length) {
-    $("marketList").innerHTML = '<div class="empty">No collections found.</div>';
-    return;
-  }
-  list.forEach(item=>{
-    const row=document.createElement("div");
-    row.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;border:1px solid rgba(66,232,224,.2);border-radius:13px;background:rgba(2,19,25,.48)";
-    row.innerHTML=`<span style="font-size:12px;font-weight:700;min-width:0;overflow-wrap:anywhere">${escapeHTML(item.name)}</span><strong style="font-size:13px;color:var(--lime);white-space:nowrap">${money(item.price)} TON</strong>`;
-    $("marketList").appendChild(row);
-  });
+  if(!list.length) { $("marketList").innerHTML = '<div class="empty">No collections found.</div>'; return; }
+  list.forEach(item=>marketRow(item.name,item.price,"collection"));
+}
+function renderMarketModels() {
+  const slug=$("marketCollectionSelect").value;
+  const q=$("marketModelSearch").value.trim().toLowerCase();
+  $("marketList").innerHTML="";
+  if(!slug) { $("marketMeta").textContent="Выбери коллекцию, чтобы увидеть её модели."; return; }
+  const models=marketAttributes[slug]?.models || {};
+  const entries=Object.entries(models).map(([name,value])=>({name,price:Number(value)})).filter(x=>Number.isFinite(x.price)&&x.name.toLowerCase().includes(q)).sort((a,b)=>a.price-b.price);
+  const collection=marketCollections.find(x=>x.slug===slug);
+  $("marketMeta").textContent=`${entries.length} моделей · ${collection?.name || prettifySlug(slug)} · Portals`;
+  if(!entries.length) { $("marketList").innerHTML='<div class="empty">Модели не найдены.</div>'; return; }
+  entries.forEach(item=>marketRow(item.name,item.price,"model"));
+}
+function setMarketTab(tab) {
+  marketTab=tab;
+  $("marketTabCollections").classList.toggle("active",tab==="collections");
+  $("marketTabModels").classList.toggle("active",tab==="models");
+  $("marketCollectionControls").style.display=tab==="collections"?"block":"none";
+  $("marketModelControls").style.display=tab==="models"?"block":"none";
+  if(tab==="collections") renderMarketFloors(); else renderMarketModels();
 }
 async function loadMarketFloors() {
-  if(marketCollections.length) { renderMarketFloors(); return; }
+  if(marketCollections.length) { marketTab==="collections"?renderMarketFloors():renderMarketModels(); return; }
   $("marketMeta").textContent="Loading Portals data…";
   try {
     const response=await fetch("https://tonavio.onrender.com/portals/floors",{headers:{"Accept":"application/json"}});
     if(!response.ok) throw new Error("API "+response.status);
     const result=await response.json();
     const floors=result?.data?.collection_floors?.floorPrices;
+    const attributes=result?.data?.attribute_floors;
     if(!floors || typeof floors!=="object") throw new Error("Unexpected Portals response");
     marketCollections=Object.entries(floors).map(([slug,value])=>({slug,name:prettifySlug(slug),price:Number(value)})).filter(x=>Number.isFinite(x.price));
+    marketAttributes=attributes && typeof attributes==="object" ? attributes : {};
+    const select=$("marketCollectionSelect");
+    select.innerHTML='<option value="">Choose collection</option>'+marketCollections.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>`<option value="${escapeHTML(x.slug)}">${escapeHTML(x.name)}</option>`).join("");
     marketLoadedAt=new Date();
-    renderMarketFloors();
+    setMarketTab(marketTab);
   } catch(error) {
     console.error("Tonavio Portals Market error:",error);
     $("marketMeta").textContent="Не удалось загрузить данные Portals.";
@@ -424,6 +458,10 @@ async function loadMarketFloors() {
     $("retryMarket").addEventListener("click",()=>{marketCollections=[];loadMarketFloors();});
   }
 }
+$("marketTabCollections").addEventListener("click",()=>setMarketTab("collections"));
+$("marketTabModels").addEventListener("click",()=>setMarketTab("models"));
+$("marketCollectionSelect").addEventListener("change",renderMarketModels);
+$("marketModelSearch").addEventListener("input",renderMarketModels);
 $("closeMarket").addEventListener("click",()=>$("marketOverlay").classList.remove("open"));
 $("marketOverlay").addEventListener("click",e=>{if(e.target===$("marketOverlay")) $("marketOverlay").classList.remove("open");});
 $("marketSearch").addEventListener("input",renderMarketFloors);
