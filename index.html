@@ -395,6 +395,8 @@ document.querySelectorAll("[data-nav]").forEach(btn=>btn.addEventListener("click
 let marketCollections = [];
 let marketAttributes = {};
 let marketModels = [];
+let marketCollectionImages = {};
+let marketModelImages = {};
 let marketLoadedAt = null;
 let marketTab = "collections";
 function prettifySlug(slug) {
@@ -402,10 +404,25 @@ function prettifySlug(slug) {
   if(known[slug]) return known[slug];
   return slug.replace(/([a-z])([A-Z])/g,"$1 $2").replace(/[-_]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
 }
-function marketRow(name,price,kind) {
+function marketRow(name,price,kind,imageUrl) {
   const row=document.createElement("div");
-  row.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;border:1px solid rgba(66,232,224,.2);border-radius:13px;background:rgba(2,19,25,.48)";
-  row.innerHTML=`<span style="font-size:12px;font-weight:700;min-width:0;overflow-wrap:anywhere">${escapeHTML(name)}</span><strong style="font-size:13px;color:var(--lime);white-space:nowrap">${money(price)} TON</strong>`;
+  row.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;border:1px solid rgba(66,232,224,.2);border-radius:13px;background:rgba(2,19,25,.48);min-width:0";
+  const media=document.createElement("div");
+  media.style.cssText="width:43px;height:43px;flex:none;border-radius:11px;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle,rgba(66,232,224,.2),rgba(7,29,36,.9));border:1px solid rgba(66,232,224,.18);color:var(--cyan);font-size:18px";
+  if(imageUrl) {
+    const img=document.createElement("img");
+    img.src=imageUrl; img.alt=""; img.loading="lazy"; img.referrerPolicy="no-referrer";
+    img.style.cssText="width:100%;height:100%;object-fit:cover";
+    img.onerror=()=>{img.remove();media.textContent="◇";};
+    media.appendChild(img);
+  } else media.textContent="◇";
+  const label=document.createElement("span");
+  label.textContent=name;
+  label.style.cssText="font-size:12px;font-weight:700;min-width:0;flex:1;overflow-wrap:anywhere";
+  const priceNode=document.createElement("strong");
+  priceNode.textContent=money(price)+" TON";
+  priceNode.style.cssText="font-size:13px;color:var(--lime);white-space:nowrap";
+  row.append(media,label,priceNode);
   $("marketList").appendChild(row);
 }
 function renderMarketFloors() {
@@ -414,7 +431,7 @@ function renderMarketFloors() {
   $("marketMeta").textContent = marketLoadedAt ? `${list.length} из ${marketCollections.length} коллекций · обновлено ${marketLoadedAt.toLocaleTimeString()}` : "Portals";
   $("marketList").innerHTML = "";
   if(!list.length) { $("marketList").innerHTML = '<div class="empty">No collections found.</div>'; return; }
-  list.forEach(item=>marketRow(item.name,item.price,"collection"));
+  list.forEach(item=>marketRow(item.name,item.price,"collection",marketCollectionImages[item.slug]));
 }
 function renderMarketModels() {
   const slug=$("marketCollectionSelect").value;
@@ -426,15 +443,18 @@ function renderMarketModels() {
   let entries=[];
   if(Array.isArray(marketModels)) {
     entries=marketModels.filter(x=>String(x.collection_name||"").normalize("NFKD").replace(/[^a-z0-9]/gi,"").toLowerCase()===collectionName.normalize("NFKD").replace(/[^a-z0-9]/gi,"").toLowerCase())
-      .map(x=>({name:String(x.name||""),price:Number(x.floor_price)}));
+      .map(x=>({name:String(x.name||""),price:Number(x.floor_price),collectionName:String(x.collection_name||"")}));
   } else {
     const models=marketAttributes[slug]?.models || {};
-    entries=Object.entries(models).map(([name,value])=>({name,price:Number(value)}));
+    entries=Object.entries(models).map(([name,value])=>({name,price:Number(value),collectionName}));
   }
   entries=entries.filter(x=>Number.isFinite(x.price)&&x.name.toLowerCase().includes(q)).sort((a,b)=>a.price-b.price);
   $("marketMeta").textContent=`${entries.length} моделей · ${collection?.name || prettifySlug(slug)} · Portals`;
   if(!entries.length) { $("marketList").innerHTML='<div class="empty">Модели не найдены.</div>'; return; }
-  entries.forEach(item=>marketRow(item.name,item.price,"model"));
+  entries.forEach(item=>{
+    const imageKey=String(item.collectionName||collectionName).normalize("NFKD").replace(/[^a-z0-9]/gi,"").toLowerCase()+"|"+item.name.normalize("NFKD").replace(/[^a-z0-9]/gi,"").toLowerCase();
+    marketRow(item.name,item.price,"model",marketModelImages[imageKey]);
+  });
 }
 function setMarketTab(tab) {
   marketTab=tab;
@@ -461,6 +481,20 @@ async function loadMarketFloors() {
     select.innerHTML='<option value="">Choose collection</option>'+marketCollections.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>`<option value="${escapeHTML(x.slug)}">${escapeHTML(x.name)}</option>`).join("");
     marketLoadedAt=new Date();
     setMarketTab(marketTab);
+    // Load images separately so the price list appears immediately.
+    fetch("https://tonavio.onrender.com/portals/images",{headers:{"Accept":"application/json"}})
+      .then(response=>{if(!response.ok) throw new Error("Images API "+response.status);return response.json();})
+      .then(payload=>{
+        const imageData=payload?.data||{};
+        (imageData.collections||[]).forEach(item=>{if(item.slug&&item.photo_url) marketCollectionImages[item.slug]=item.photo_url;});
+        (imageData.models||[]).forEach(item=>{
+          if(!item.photo_url) return;
+          const key=String(item.collection_name||"").normalize("NFKD").replace(/[^a-z0-9]/gi,"").toLowerCase()+"|"+String(item.name||"").normalize("NFKD").replace(/[^a-z0-9]/gi,"").toLowerCase();
+          marketModelImages[key]=item.photo_url;
+        });
+        marketTab==="collections"?renderMarketFloors():renderMarketModels();
+      })
+      .catch(error=>console.warn("Tonavio image data unavailable:",error));
   } catch(error) {
     console.error("Tonavio Portals Market error:",error);
     $("marketMeta").textContent="Не удалось загрузить данные Portals.";
