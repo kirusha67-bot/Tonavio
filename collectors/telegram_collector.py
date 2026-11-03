@@ -107,111 +107,116 @@ def _first_image(item):
 
 
 async def collect_market_images():
-    """Returns cached Portals images for collections and their models."""
+    """Returns Portals preview images and representative NFT images per model."""
     now = time.time()
     if _IMAGE_CACHE["data"] and now < _IMAGE_CACHE["expires"]:
         return _IMAGE_CACHE["data"]
 
     floors_data = await collect_gifts()
-    models = floors_data.get("attribute_floors", {}).get("models", [])
-    if not isinstance(models, list):
-        models = []
+    raw_models = floors_data.get("attribute_floors", {}).get("models", [])
+    models = [m for m in raw_models if isinstance(m, dict)] if isinstance(raw_models, list) else []
 
-    preview = await asyncio.to_thread(_get_portals_data, "/collections/preview")
-    collections = (
-        preview.get("collections", [])
-        if isinstance(preview, dict)
-        else []
-    )
-    if not isinstance(collections, list) and isinstance(preview, dict):
-        collections = preview.get("data", {}).get("collections", [])
-
+    preview_payload = await asyncio.to_thread(_get_portals_data, "/collections/preview")
+    preview_rows = preview_payload.get("collections", []) if isinstance(preview_payload, dict) else []
+    preview_by_slug = {}
     preview_by_name = {}
-    for item in collections if isinstance(collections, list) else []:
-        if isinstance(item, dict):
-            key = _normalized(item.get("short_name") or item.get("name"))
-            if key:
-                preview_by_name[key] = item
-
-    # Fetch one batch of the most expensive listed gifts per collection.
-    # The returned NFT attributes let us map each actual image to its model.
-    grouped = {}
-    for model in models:
-        if not isinstance(model, dict):
+    for item in preview_rows if isinstance(preview_rows, list) else []:
+        if not isinstance(item, dict):
             continue
+        if item.get("short_name"):
+            preview_by_slug[_normalized(item["short_name"])] = item
+        if item.get("name"):
+            preview_by_name[_normalized(item["name"])] = item
+
+    # Map each collection by either its actual API slug or its display name.
+    collection_lookup = {}
+    for slug in floors_data.get("collection_floors", {}).get("floorPrices", {}):
+        item = preview_by_slug.get(_normalized(slug)) or preview_by_name.get(_normalized(slug.replace("-", " ").replace("_", " ")))
+        if item:
+            collection_lookup[_normalized(slug)] = item
+
+    # Model floors contain the full collection display name. Resolve the preview UUID
+    # through both preview name and short_name so NFT image queries use the right ID.
+    groups = {}
+    for model in models:
         collection_name = str(model.get("collection_name") or "")
         model_name = str(model.get("name") or "")
-        if collection_name and model_name:
-            grouped.setdefault(_normalized(collection_name), {
-                "collection_name": collection_name,
-                "models": []
-            })["models"].append(model_name)
+        if not collection_name or not model_name:
+            continue
+        key = _normalized(collection_name)
+        groups.setdefault(key, {"collection_name": collection_name, "models": []})["models"].append(model_name)
 
-    model_images = {}
-    collection_images = {}
-    for key, group in grouped.items():
-        preview_item = preview_by_name.get(key)
+    preview_for_group = {}
+    for key, group in groups.items():
+        preview_for_group[key] = preview_by_name.get(key)
+        if not preview_for_group[key]:
+            preview_for_group[key] = preview_by_slug.get(key)
+
+    async def find_model_image(collection_id, model_name):
+        params = [
+            ("collection_id", str(collection_id)),
+            ("filter_by_models", model_name),
+            ("sort_by", "price desc"),
+            ("limit", "1"),
+        ]
+        try:
+            payload = await asyncio.to_thread(
+                _get_portals_data,
+                "/nfts/search?" + urlencode(params)
+            )
+            results = payload.get("results", []) if isinstance(payload, dict) else []
+            if results and isinstance(results[0], dict):
+                return _first_image(results[0])
+        except Exception as error:
+            print("PORTALS MODEL IMAGE:", model_name, str(error)[:180])
+        return None
+
+    # Ask for one representative NFT per model. Bounded concurrency avoids
+    # overwhelming the partner API; images are cached for 30 minutes.
+    semaphore = asyncio.Semaphore(4)
+    async def guarded_lookup(collection_id, model_name):
+        async with semaphore:
+            return await find_model_image(collection_id, model_name)
+
+    tasks = {}
+    for key, group in groups.items():
+        preview_item = preview_for_group.get(key)
         collection_id = preview_item.get("id") if isinstance(preview_item, dict) else None
-        if preview_item:
-            collection_images[key] = _first_image(preview_item)
-
         if not collection_id:
             continue
+        for model_name in dict.fromkeys(group["models"]):
+            tasks[(key, _normalized(model_name))] = asyncio.create_task(
+                guarded_lookup(collection_id, model_name)
+            )
 
-        params = [("collection_id", str(collection_id)), ("sort_by", "price desc"), ("limit", "100"), ("status", "listed")]
-        params.extend(("filter_by_models", name) for name in dict.fromkeys(group["models"]))
-        endpoint = "/nfts/search?" + urlencode(params)
-        try:
-            result = await asyncio.to_thread(_get_portals_data, endpoint)
-            nft_items = result.get("results", []) if isinstance(result, dict) else []
-            if not isinstance(nft_items, list) and isinstance(result, dict):
-                nft_items = result.get("data", {}).get("results", [])
-            for nft in nft_items if isinstance(nft_items, list) else []:
-                image_url = _first_image(nft)
-                if not image_url:
-                    continue
-                attributes = nft.get("attributes", [])
-                if isinstance(attributes, dict):
-                    attributes = [{"type": k, "name": v} for k, v in attributes.items()]
-                for attr in attributes if isinstance(attributes, list) else []:
-                    if not isinstance(attr, dict):
-                        continue
-                    attr_name = str(attr.get("name") or attr.get("value") or "")
-                    attr_type = str(attr.get("type") or attr.get("trait_type") or "").lower()
-                    if attr_name and (not attr_type or "model" in attr_type):
-                        model_images[(key, _normalized(attr_name))] = image_url
-        except Exception as error:
-            # Images are optional; floor data must remain available if this endpoint
-            # is temporarily unavailable or the partner API limits the request.
-            print("PORTALS IMAGE LOOKUP:", group["collection_name"], str(error)[:250])
+    model_images = {}
+    if tasks:
+        values = await asyncio.gather(*tasks.values())
+        model_images = {key: value for key, value in zip(tasks.keys(), values) if value}
 
     collection_rows = []
     for slug, floor in floors_data.get("collection_floors", {}).get("floorPrices", {}).items():
-        name = slug
-        preview_item = preview_by_name.get(_normalized(name)) or preview_by_name.get(_normalized(name.replace("-", " ").replace("_", " ")))
-        group = grouped.get(_normalized(name)) or next(
-            (v for k, v in grouped.items() if k == _normalized(name.replace("-", "").replace("_", ""))),
-            None
-        )
+        preview_item = collection_lookup.get(_normalized(slug))
+        group = groups.get(_normalized(preview_item.get("name"))) if preview_item else None
+        if not group:
+            group = groups.get(_normalized(slug))
         top_model = None
         if group:
             candidates = [m for m in models if _normalized(m.get("collection_name")) == _normalized(group["collection_name"])]
             if candidates:
                 top_model = max(candidates, key=lambda x: float(x.get("floor_price") or 0))
         top_name = str(top_model.get("name")) if top_model else None
-        image = model_images.get((_normalized(group["collection_name"]), _normalized(top_name))) if group and top_name else None
-        if not image and preview_item:
-            image = _first_image(preview_item)
+        model_photo = model_images.get((_normalized(group["collection_name"]), _normalized(top_name))) if group and top_name else None
+        collection_photo = _first_image(preview_item) if preview_item else None
         collection_rows.append({
             "slug": slug,
-            "photo_url": image,
-            "top_model": top_name
+            "photo_url": model_photo or collection_photo,
+            "top_model": top_name,
+            "image_source": "model" if model_photo else ("collection" if collection_photo else None)
         })
 
     model_rows = []
     for model in models:
-        if not isinstance(model, dict):
-            continue
         key = _normalized(model.get("collection_name"))
         model_rows.append({
             "collection_name": model.get("collection_name"),
