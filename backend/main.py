@@ -2,7 +2,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from collectors.telegram_collector import collect_gifts
+from collectors.telegram_collector import collect_gifts, collect_market_images
 
 
 app = FastAPI(title="Tonavio API")
@@ -86,4 +86,17 @@ async def portals_floors():
         raise HTTPException(
             status_code=502,
             detail=f"Ошибка получения данных Portals: {error}"
+        ) from error
+
+
+
+@app.get("/portals/images")
+async def portals_images():
+    try:
+        data = await collect_market_images()
+        return {"status": "ok", "data": data}
+    except Exception as error:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Ошибка получения изображений Portals: {error}"
         ) from error
