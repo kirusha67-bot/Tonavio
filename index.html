@@ -425,7 +425,7 @@ function renderMarketModels() {
   const collectionName=collection?.name || prettifySlug(slug);
   let entries=[];
   if(Array.isArray(marketModels)) {
-    entries=marketModels.filter(x=>String(x.collection_name||"").trim().toLowerCase()===collectionName.trim().toLowerCase())
+    entries=marketModels.filter(x=>String(x.collection_name||"").normalize("NFKD").replace(/[^a-z0-9]/gi,"").toLowerCase()===collectionName.normalize("NFKD").replace(/[^a-z0-9]/gi,"").toLowerCase())
       .map(x=>({name:String(x.name||""),price:Number(x.floor_price)}));
   } else {
     const models=marketAttributes[slug]?.models || {};
