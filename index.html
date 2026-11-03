@@ -394,6 +394,7 @@ document.querySelectorAll("[data-nav]").forEach(btn=>btn.addEventListener("click
 
 let marketCollections = [];
 let marketAttributes = {};
+let marketModels = [];
 let marketLoadedAt = null;
 let marketTab = "collections";
 function prettifySlug(slug) {
@@ -420,9 +421,17 @@ function renderMarketModels() {
   const q=$("marketModelSearch").value.trim().toLowerCase();
   $("marketList").innerHTML="";
   if(!slug) { $("marketMeta").textContent="Выбери коллекцию, чтобы увидеть её модели."; return; }
-  const models=marketAttributes[slug]?.models || {};
-  const entries=Object.entries(models).map(([name,value])=>({name,price:Number(value)})).filter(x=>Number.isFinite(x.price)&&x.name.toLowerCase().includes(q)).sort((a,b)=>a.price-b.price);
   const collection=marketCollections.find(x=>x.slug===slug);
+  const collectionName=collection?.name || prettifySlug(slug);
+  let entries=[];
+  if(Array.isArray(marketModels)) {
+    entries=marketModels.filter(x=>String(x.collection_name||"").trim().toLowerCase()===collectionName.trim().toLowerCase())
+      .map(x=>({name:String(x.name||""),price:Number(x.floor_price)}));
+  } else {
+    const models=marketAttributes[slug]?.models || {};
+    entries=Object.entries(models).map(([name,value])=>({name,price:Number(value)}));
+  }
+  entries=entries.filter(x=>Number.isFinite(x.price)&&x.name.toLowerCase().includes(q)).sort((a,b)=>a.price-b.price);
   $("marketMeta").textContent=`${entries.length} моделей · ${collection?.name || prettifySlug(slug)} · Portals`;
   if(!entries.length) { $("marketList").innerHTML='<div class="empty">Модели не найдены.</div>'; return; }
   entries.forEach(item=>marketRow(item.name,item.price,"model"));
@@ -447,6 +456,7 @@ async function loadMarketFloors() {
     if(!floors || typeof floors!=="object") throw new Error("Unexpected Portals response");
     marketCollections=Object.entries(floors).map(([slug,value])=>({slug,name:prettifySlug(slug),price:Number(value)})).filter(x=>Number.isFinite(x.price));
     marketAttributes=attributes && typeof attributes==="object" ? attributes : {};
+    marketModels=Array.isArray(attributes?.models) ? attributes.models : [];
     const select=$("marketCollectionSelect");
     select.innerHTML='<option value="">Choose collection</option>'+marketCollections.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(x=>`<option value="${escapeHTML(x.slug)}">${escapeHTML(x.name)}</option>`).join("");
     marketLoadedAt=new Date();
